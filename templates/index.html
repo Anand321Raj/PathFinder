@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PathFinder — Career Recommender</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --card: #ffffff;
+    --primary: #2d6a4f;
+    --primary-light: #52b788;
+    --accent: #f4845f;
+    --accent2: #f9c74f;
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --border: #e0d9ce;
+    --selected-bg: #d8f3dc;
+    --selected-border: #2d6a4f;
+    --chip-bg: #f0ebe0;
+    --chip-hover: #e3f2e8;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(45,106,79,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HOMEPAGE ── */
+  #page-home {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #page-home::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, #b7e4c7 0%, transparent 70%);
+    top: -100px; right: -100px;
+    pointer-events: none;
+  }
+  #page-home::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, #ffd6a5 0%, transparent 70%);
+    bottom: -80px; left: -80px;
+    pointer-events: none;
+  }
+
+  .home-badge {
+    background: #d8f3dc;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 50px;
+    margin-bottom: 24px;
+    letter-spacing: 0.5px;
+  }
+
+  .home-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(48px, 8vw, 80px);
+    font-weight: 700;
+    line-height: 1.05;
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .home-title span {
+    color: var(--primary);
+    position: relative;
+  }
+
+  .home-subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 480px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 18px 44px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 6px 20px rgba(45,106,79,0.30);
+  }
+  .btn-primary:hover {
+    background: #1e4d38;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(45,106,79,0.35);
+  }
+
+  .home-features {
+    display: flex;
+    gap: 24px;
+    margin-top: 60px;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+  .feature-pill {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feature-pill .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--primary-light);
+  }
+
+  .team-section {
+    margin-top: 64px;
+    width: 100%;
+    max-width: 720px;
+    position: relative;
+    z-index: 1;
+  }
+  .team-heading {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .team-cards {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .team-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    flex: 1;
+    min-width: 180px;
+    max-width: 210px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .team-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+  }
+  .team-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 auto 12px;
+    font-family: 'Fraunces', serif;
+  }
+  .team-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .team-id {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── WIZARD PAGES ── */
+  .page { display: none; }
+  .page.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--card);
+    border-bottom: 1.5px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .progress-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .step-back {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .step-back:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* ── STEP CONTENT ── */
+  .step-content {
+    flex: 1;
+    padding: 40px 32px 120px;
+    max-width: 960px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .step-header { margin-bottom: 32px; }
+  .step-number {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+  .step-title {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .step-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ── CATEGORY SECTION ── */
+  .category-section { margin-bottom: 36px; }
+  .category-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .category-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .chips-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .chip {
+    background: var(--chip-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .chip:hover {
+    background: var(--chip-hover);
+    border-color: var(--primary-light);
+    color: var(--primary);
+  }
+  .chip.selected {
+    background: var(--selected-bg);
+    border-color: var(--selected-border);
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .chip.selected::before {
+    content: '✓ ';
+    font-size: 12px;
+  }
+
+  /* ── DROPDOWN FIELDS ── */
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 600px) { .fields-grid { grid-template-columns: 1fr; } }
+
+  .field-group { display: flex; flex-direction: column; gap: 8px; }
+  .field-group.full { grid-column: 1 / -1; }
+
+  .field-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .field-select, .field-input {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+  }
+  .field-input {
+    background-image: none;
+    padding-right: 16px;
+  }
+  .field-select:focus, .field-input:focus {
+    border-color: var(--primary);
+  }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--card);
+    border-top: 1.5px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 100;
+  }
+  .selected-count {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .selected-count strong { color: var(--primary); }
+  .btn-next {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 14px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(45,106,79,0.25);
+  }
+  .btn-next:hover { background: #1e4d38; transform: translateY(-1px); }
+  .btn-next:disabled { background: #b0bec5; box-shadow: none; cursor: not-allowed; transform: none; }
+
+  /* ── RESULTS PAGE ── */
+  #page-results .step-content { padding-bottom: 60px; }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+  }
+
+  .result-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.5s ease both;
+  }
+  .result-card:nth-child(2) { animation-delay: 0.1s; }
+  .result-card:nth-child(3) { animation-delay: 0.2s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+
+  .result-card.rank-1 {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, #f0faf4 0%, #fff 100%);
+  }
+  .result-card.rank-1::before {
+    content: '🏆 Best Match';
+    position: absolute;
+    top: 16px; right: 16px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 50px;
+    letter-spacing: 0.5px;
+  }
+
+  .result-rank {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .result-career {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  .confidence-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .confidence-bar-bg {
+    background: var(--border);
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .confidence-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    transition: width 1s ease 0.3s;
+  }
+  .result-card.rank-1 .confidence-bar-fill {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .confidence-pct {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    font-family: 'Fraunces', serif;
+  }
+  .result-card.rank-1 .confidence-pct { color: var(--accent); }
+
+  .btn-restart {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 40px;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-restart:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* ── LOADING ── */
+  #loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(245,240,232,0.92);
+    z-index: 999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  #loading-overlay.show { display: flex; }
+
+  .spinner {
+    width: 48px; height: 48px;
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    color: var(--primary);
+  }
+
+  /* ── ERROR TOAST ── */
+  #error-toast {
+    display: none;
+    position: fixed;
+    bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    background: #fee2e2;
+    border: 1.5px solid #fca5a5;
+    color: #b91c1c;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  #error-toast.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ══ LOADING OVERLAY ══ -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Finding your best careers…</div>
+</div>
+
+<!-- ══ ERROR TOAST ══ -->
+<div id="error-toast"></div>
+
+<!-- ══════════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="home-badge">🌿 AI-Powered Career Guidance</div>
+  <h1 class="home-title">Find Your<br/><span>Perfect Career</span></h1>
+  <p class="home-subtitle">Answer a few simple questions about your skills and interests. Our AI will recommend the 3 best career paths just for you.</p>
+  <button class="btn-primary" onclick="goToStep(1)">Find Your Career →</button>
+  <div class="home-features">
+    <div class="feature-pill"><span class="dot"></span> Hard Skills</div>
+    <div class="feature-pill"><span class="dot"></span> Soft Skills</div>
+    <div class="feature-pill"><span class="dot"></span> Interests</div>
+    <div class="feature-pill"><span class="dot"></span> Education</div>
+    <div class="feature-pill"><span class="dot"></span> Top 3 Results</div>
+  </div>
+
+  <div class="team-section">
+    <div class="team-heading">Project Team</div>
+    <div class="team-cards">
+      <div class="team-card">
+        <div class="team-avatar">K</div>
+        <div class="team-name">Khushi Rani</div>
+        <div class="team-id">SBU232843</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">A</div>
+        <div class="team-name">Anand Kumar</div>
+        <div class="team-id">SBU232780</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">S</div>
+        <div class="team-name">Saurabh Kumar</div>
+        <div class="team-id">SBU232657</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PAGE: STEP 1 — HARD SKILLS
+══════════════════════════════════════ -->
+<div id="page-step1" class="page">
+  <div class="topbar">
+    <div class="topbar-logo">PathFinder</div>
+    <div class="progress-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:20%"></div></div>
+      <span class="progress-label">Step 1 of 5</span>
+    </div>
+    <button class="step-back" onclick="goToStep(0)">← Back</button>
+  </div>
+
+  <div class="step-content">
+    <div class="step-header">
+      <div class="step-number">Step 1 — Hard Skills</div>
+      <div class="step-title">What are you good at?</div>
+      <div class="step-desc">Select all technical skills that apply to you. You can choose as many as you like.</div>
+    </div>
+    <div id="hard-skills-container"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="selected-count">Selected: <strong id="hard-count">0</strong></div>
+    <button class="btn-next" id="btn-hard-next" onclick="goToStep(2)" disabled>Next →</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PAGE: STEP 2 — SOFT SKILLS
+══════════════════════════════════════ -->
+<div id="page-step2" class="page">
+  <div class="topbar">
+    <div class="topbar-logo">PathFinder</div>
+    <div class="progress-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:40%"></div></div>
+      <span class="progress-label">Step 2 of 5</span>
+    </div>
+    <button class="step-back" onclick="goToStep(1)">← Back</button>
+  </div>
+
+  <div class="step-content">
+    <div class="step-header">
+      <div class="step-number">Step 2 — Soft Skills</div>
+      <div class="step-title">How do you work?</div>
+      <div class="step-desc">Select the personal and interpersonal strengths that describe you best.</div>
+    </div>
+    <div id="soft-skills-container"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="selected-count">Selected: <strong id="soft-count">0</strong></div>
+    <button class="btn-next" id="btn-soft-next" onclick="goToStep(3)" disabled>Next →</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PAGE: STEP 3 — INTERESTS
+══════════════════════════════════════ -->
+<div id="page-step3" class="page">
+  <div class="topbar">
+    <div class="topbar-logo">PathFinder</div>
+    <div class="progress-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:60%"></div></div>
+      <span class="progress-label">Step 3 of 5</span>
+    </div>
+    <button class="step-back" onclick="goToStep(2)">← Back</button>
+  </div>
+
+  <div class="step-content">
+    <div class="step-header">
+      <div class="step-number">Step 3 — Interests</div>
+      <div class="step-title">What excites you?</div>
+      <div class="step-desc">Pick the topics and fields that genuinely interest you.</div>
+    </div>
+    <div id="interests-container"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="selected-count">Selected: <strong id="interest-count">0</strong></div>
+    <button class="btn-next" id="btn-interest-next" onclick="goToStep(4)" disabled>Next →</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PAGE: STEP 4 — EDUCATION & PROFILE
+══════════════════════════════════════ -->
+<div id="page-step4" class="page">
+  <div class="topbar">
+    <div class="topbar-logo">PathFinder</div>
+    <div class="progress-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:80%"></div></div>
+      <span class="progress-label">Step 4 of 5</span>
+    </div>
+    <button class="step-back" onclick="goToStep(3)">← Back</button>
+  </div>
+
+  <div class="step-content">
+    <div class="step-header">
+      <div class="step-number">Step 4 — Education & Profile</div>
+      <div class="step-title">Tell us about yourself</div>
+      <div class="step-desc">Fill in your educational background and experience level.</div>
+    </div>
+
+    <div class="fields-grid">
+      <div class="field-group">
+        <label class="field-label">Education Level</label>
+        <select class="field-select" id="education-level">
+          <option value="">Select…</option>
+          <option>Bachelor's</option>
+          <option>Master's</option>
+          <option>PhD</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Profile Type</label>
+        <select class="field-select" id="profile-type">
+          <option value="">Select…</option>
+          <option>Strong Fit</option>
+          <option>Moderate Fit</option>
+          <option>Weak but Interested</option>
+          <option>Career Switcher</option>
+          <option>Experienced Professional</option>
+        </select>
+      </div>
+
+      <div class="field-group full">
+        <label class="field-label">Degree / Field of Study</label>
+        <select class="field-select" id="degree-field">
+          <option value="">Select…</option>
+          <option>Academic Research Fields</option><option>Accounting</option><option>Advertising</option><option>Aerospace Engineering</option><option>Anatomy</option><option>Animation</option><option>Architecture</option><option>Artificial Intelligence</option><option>Automobile Engineering</option><option>Aviation / Aeronautical Studies</option><option>B.Ed / M.Ed</option><option>Behavioral Science</option><option>Biology</option><option>Biomedical Science</option><option>Biotechnology</option><option>Business Administration</option><option>Business Administration (Supply Chain Focus)</option><option>Business Analytics</option><option>Chartered Accountancy</option><option>Chemistry</option><option>Civil Engineering</option><option>Civil Engineering (Architecture Track)</option><option>Civil Services Background</option><option>Clinical Psychology</option><option>Commerce</option><option>Communication Design</option><option>Communication Studies</option><option>Computer Engineering</option><option>Computer Science</option><option>Computer Science (UI/UX crossovers)</option><option>Constitutional Law</option><option>Construction Management</option><option>Counseling</option><option>Criminal Law</option><option>Data Science</option><option>Economics</option><option>Education</option><option>Electrical Engineering</option><option>Electronics Engineering</option><option>Energy Engineering</option><option>Engineering</option><option>Engineering (Any Discipline)</option><option>Engineering (General)</option><option>English Literature</option><option>Entrepreneurship</option><option>Environmental Studies</option><option>Fashion Design</option><option>Finance</option><option>Financial Engineering</option><option>Fine Arts</option><option>Geography</option><option>Governance Studies</option><option>Graphic Design</option><option>Health Administration</option><option>History</option><option>Human-Computer Interaction</option><option>Industrial Engineering</option><option>Information Technology</option><option>Infrastructure Planning</option><option>Instrumentation Engineering</option><option>Interaction Design / Graphic Design</option><option>Interior Design</option><option>International Relations</option><option>Journalism</option><option>Kinesiology</option><option>Law</option><option>Law (LLB / JD)</option><option>Life Sciences</option><option>Logistics Management</option><option>M.Ed</option><option>MBA</option><option>MBA (Finance)</option><option>MBA (Marketing)</option><option>MBBS / Medicine</option><option>Management Studies</option><option>Manufacturing Engineering</option><option>Marketing</option><option>Marketing / Communications</option><option>Mass Communication</option><option>Materials Science</option><option>Mathematics</option><option>Mechanical Engineering</option><option>Mechatronics Engineering</option><option>Media Studies</option><option>Medical Sciences</option><option>Multimedia Design</option><option>Nursing</option><option>Occupational Therapy</option><option>Operations Management</option><option>PhD (Relevant Discipline)</option><option>Pharmacy</option><option>Philosophy</option><option>Physical Education</option><option>Physics</option><option>Physiology</option><option>Physiotherapy</option><option>Political Science (Advanced Law Track)</option><option>Production Engineering</option><option>Psychology</option><option>Psychology / Behavioral Science</option><option>Public Administration</option><option>Public Health</option><option>Public Policy</option><option>Public Relations</option><option>Social Sciences</option><option>Social Work</option><option>Sociology</option><option>Software Engineering</option><option>Sports Science</option><option>Statistics</option><option>Subject-Specific Degrees (e.g., Mathematics, Physics, Literature, etc.)</option><option>Supply Chain Management</option><option>Urban Planning</option><option>Visual Communication</option>
+        </select>
+      </div>
+
+      <div class="field-group full">
+        <label class="field-label">Years of Experience <span style="color:var(--text-muted);font-weight:400">(enter 0 if fresher)</span></label>
+        <input type="number" class="field-input" id="experience-level" min="0" max="40" placeholder="e.g. 2" />
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="selected-count">All fields required</div>
+    <button class="btn-next" id="btn-profile-next" onclick="submitForm()">Get My Careers →</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PAGE: RESULTS
+══════════════════════════════════════ -->
+<div id="page-results" class="page">
+  <div class="topbar">
+    <div class="topbar-logo">PathFinder</div>
+    <div class="progress-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:100%"></div></div>
+      <span class="progress-label">Done! ✓</span>
+    </div>
+    <button class="step-back" onclick="resetAndGoHome()">Start Over</button>
+  </div>
+
+  <div class="step-content">
+    <div class="step-header">
+      <div class="step-number">Your Results</div>
+      <div class="step-title">Your Top 3 Career Matches</div>
+      <div class="step-desc">Based on your skills, interests, and background — here are the careers that suit you best.</div>
+    </div>
+    <div class="results-grid" id="results-grid"></div>
+    <button class="btn-restart" onclick="resetAndGoHome()">↩ Start Over</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────
+
+const HARD_SKILLS = {
+  "Technology & Programming": ["API Development","API Integration","AWS","Agile Methodology","Algorithms","Android Development","Angular","Artificial Intelligence (AI)","Authentication & Authorization","Big Data Processing","Blockchain Technology","CI/CD Pipelines","CSS","Code Optimization","Computer Vision","Data Engineering","Data Structures","Database Design","Debugging Techniques","Deep Learning","Django","Docker","Embedded Systems","Express.js","Feature Engineering","Flask","Frontend Architecture","Google Cloud Platform","HTML","HTML/CSS","Hadoop","Java","JavaScript","Kotlin","Kubernetes","Linux Systems","MATLAB","MLOps","Machine Learning","Microcontrollers","Microservices Architecture","Microsoft Azure","Mobile UI/UX Design","Multithreading","Natural Language Processing","Natural Language Processing (NLP)","NoSQL","Node.js","NumPy","Object-Oriented Programming","Objective-C","Operating Systems","Pandas","Performance Optimization","Progressive Web Apps","PyTorch","Python","R","RESTful Services","React","React Native","Recommendation Systems","Responsive Design","Responsive Web Design","SQL","Scikit-learn","Security Fundamentals","Software Architecture","Software Development Lifecycle","Spark","Spring Boot","State Management","Swift","System Design","TensorFlow","Testing & QA Practices","Unit Testing","Version Control (Git)","Vue.js","Web Accessibility Standards","Web Analytics","Web Performance Optimization","iOS Development"],
+  "Design & Creative": ["2D Animation","3D Animation","Adobe Illustrator","Adobe InDesign","Adobe Photoshop","Aesthetic Judgment","Animation Rigging","Apparel Design","Artistic Expression","Branding Design","Character Animation","Color Theory","Compositing","Composition Techniques","Concept Sketching","Copywriting","Creative Brief Development","Creative Concept Development","Creative Research","Creative Thinking","Creative Writing","Design Critique Techniques","Design Principles","Design Thinking","Digital Illustration","Embellishment Techniques","Fabric Selection","Fashion Draping Techniques","Fashion Illustration","Fashion Merchandising","Fashion Portfolio Development","Fashion Production Planning","Fashion Styling","Fashion Trend Forecasting","Figma / Sketch / Adobe XD","Frame-by-Frame Animation","Garment Construction","Graphic Design","Idea Visualization","Infographic Design","Interaction Design (IxD)","Keyframing","Layout Design","Logo Design","Mood Board Creation","Motion Graphics","Packaging Design","Pattern Making","Poster Design","Print Design","Storyboarding","Storytelling Techniques","Sustainable Fashion Practices","Textile Knowledge","Typography","UI Design Principles","User Experience Basics","Video Editing","Visual Architecture","Visual Branding Fundamentals","Visual Communication","Visual Content Planning","Visual Effects (VFX)","Visual Hierarchy","Visual Identity Development","Visual/UI Design Theory (Color, Typography)","Wireframing & Prototyping"],
+  "Finance & Business": ["A/B Testing","Accounting Standards","Affiliate Marketing","Algorithmic Trading","Anti-Money Laundering (AML)","Asset Allocation","Audit Procedures","B2B Sales","B2C Sales","Banking Compliance","Budgeting","Business Analysis","Business Analytics","Business Communication","Business Intelligence Tools","Business Process Modeling","Business Strategy","Business Valuation","Capital Markets","Cash Flow Management","Commercial Banking","Competitive Analysis","Competitive Benchmarking","Compliance Auditing","Compliance Management","Content Marketing","Contract Management","Conversion Rate Optimization","Corporate Communication","Corporate Finance","Corporate Governance","Corporate Law","Corporate Restructuring","Corporate Strategy","Corporate Tax Planning","Cost Accounting","Cost Audit","Cost Management","Credit Analysis","Customer Acquisition Planning","Customer Analytics","Customer Journey Mapping","Customer Retention Strategy","Dashboard Creation","Data Analysis","Data Visualization","Debt Structuring","Derivatives Trading","Discounted Cash Flow (DCF) Analysis","ERP Systems","Economic Analysis","Email Marketing","Equity Research","Excel","External Auditing","Financial Accounting","Financial Analysis","Financial Forecasting","Financial Modeling","Financial Ratio Analysis","Financial Reporting","Financial Risk Modeling","Financial Statement Analysis","Fintech Applications","Forecasting","Forensic Accounting","Fraud Investigation","Go-To-Market Strategy","Google Ads Management","Google Analytics","Growth Hacking","IPO Process Management","Internal Auditing","Internal Controls","Investment Strategy","KPI Development","KYC Procedures","Lead Generation","Loan Origination","Management Accounting","Market Analysis","Market Positioning","Market Research","Marketing Automation","Marketing Strategy","Mergers & Acquisitions","Negotiation Skills","Performance Marketing","Portfolio Management","Pricing Strategy","Private Equity Analysis","Product Analytics","Product Lifecycle Management","Product Marketing","Product Roadmapping","Product Strategy","Regulatory Compliance","Revenue Modeling","Risk Assessment","ROI Analysis","Sales Strategy","Securities Analysis","Statistical Analysis","Strategic Financial Planning","Strategic Planning","Tax Audit","Taxation Principles","Treasury Management","Underwriting","Valuation Techniques","Venture Capital Analysis","Wealth Management"],
+  "Engineering & Science": ["3D Modeling (Architectural Context)","Analog Electronics","Applied Physics","Architectural Design","Architectural Drafting","Architectural Rendering","AutoCAD","AutoCAD (Architecture Use)","Automotive Systems","Building Codes & Regulations","Building Design Principles","Building Information Modeling (BIM)","Building Materials","CAD Design","CAD/CAM","CNC Programming","Circuit Analysis","Commercial Building Design","Concrete Technology","Control Systems","Cost Estimation","Digital Electronics","Dynamics","Electrical Machines","Electrical Wiring Design","Energy Management","Engine Mechanics","Engineering Design Principles","Engineering Mathematics","Engineering Mechanics","Engineering Project Management","Engineering Simulation","Engineering Thermodynamics","Environmental Engineering","Failure Analysis","Finite Element Analysis","Fluid Mechanics","Foundation Design","Geotechnical Engineering","HVAC Systems","Heat Transfer","Hydraulics","Hypothesis Testing","Industrial Automation","Industrial Power Distribution","Instrumentation Engineering","Irrigation Engineering","Kinematics","Kinematics of Machinery","Machine Design","Manufacturing Processes","Material Science","Material Selection (Construction)","Mechanical Assembly","Mechanics of Materials","Mechatronics","Motor Control Systems","PCB Design","PLC Programming","Pneumatics","Power Electronics","Power Plant Engineering","Power Systems","Quantity Surveying","SCADA Systems","Signal Processing","Six Sigma","Soil Mechanics","SolidWorks","Structural Analysis","Structural Concepts for Architects","Structural Design Codes","Structural Design Codes","Surveying","Thermodynamics","Transportation Engineering","VLSI Fundamentals","Water Resource Engineering","Zoning Regulations"],
+  "Healthcare & Medicine": ["Acute Care Management","Advanced Life Support (ALS)","Assistive Device Training","Basic Life Support (BLS)","Bedside Care","Cardiopulmonary Rehabilitation","Care Coordination","Chronic Care Management","Clinical Decision Making","Clinical Documentation (Nursing)","Clinical Examination","Clinical Pharmacology","Clinical Procedures","Clinical Safety Protocols","Clinical Treatment Planning","Compounding Basics","Compliance Auditing (Healthcare)","Diagnostic Test Ordering","Differential Diagnosis","Disease Management","Dosage Form Knowledge","Drug Dispensing","Drug Interaction Analysis","Electronic Health Records (EHR)","Emergency Care Fundamentals","Evidence-Based Practice","Exercise Prescription","Gait Analysis","Geriatric Rehabilitation","Health Education","Healthcare Administration Basics","Healthcare Communication","Healthcare Regulations","ICU Support Basics","IV Therapy","Infection Control","Infection Prevention Practices","Inventory Management (Pharmacy)","Laboratory Test Interpretation","Manual Therapy","Medical Case Analysis","Medical Documentation","Medical Ethics","Medical History Assessment","Medical Referral Coordination","Medical Terminology","Medication Administration","Medication Counseling","Medication Therapy Management","Mental Health Diagnosis","Mobility Assessment","Neurological Rehabilitation","Neuropsychological Testing","Nursing Care Planning","OTC Advisory","Orthopedic Rehabilitation","Pain Management (Physical Therapy)","Patient Confidentiality","Patient Counseling","Patient Diagnosis","Patient Monitoring","Patient Motivation","Patient Prognosis Evaluation","Patient Support Services","Pediatric Rehabilitation","Pharmaceutical Calculations","Pharmacology","Pharmacovigilance","Pharmacy Law & Ethics","Physical Therapy Techniques","Post-Operative Care","Posture Correction","Prescription Management","Prescription Verification","Prosthetic Training","Psychiatric Rehabilitation","Quality Assurance (Pharmacy)","Rehabilitation Planning","Risk Assessment (Clinical Context)","Risk Management (Healthcare)","Sports Injury Rehabilitation","Suicide Risk Assessment","Telemedicine Basics","Telepsychiatry","Therapeutic Modalities","Trauma-Informed Care","Treatment Protocol Adherence","Vital Monitoring Equipment Handling","Vital Signs Monitoring","Wound Care"],
+  "Education & Research": ["Academic Accreditation Awareness","Academic Advisory","Academic Committee Participation","Academic Conference Participation","Academic Curriculum Design","Academic Ethics","Academic Policy Implementation","Academic Presentation","Academic Program Development","Academic Research Basics","Academic Writing","Advanced Subject Expertise","Basic Educational Counseling","Basic IT Tools for Education","Classroom Activity Planning","Classroom Discipline Management","Classroom Management","Co-Curricular Activity Planning","Curriculum Development","Differentiated Instruction","Digital Content Creation (Educational Use)","Educational Psychology Basics","Educational Resource Development","Educational Software Usage","Educational Technology Integration","Examination Supervision","Experimental Design","Graduate Mentorship","Grant Proposal Writing","Homework & Assignment Design","Inclusive Education Practices","Instructional Design","Learning Outcome Measurement","Lesson Planning","Literature Review","Parent Communication","Peer Review Process","Postgraduate Teaching Methods","Presentation Skills","Qualitative Research","Quantitative Research","Report Card Preparation","Research Documentation","Research Ethics","Research Methodology","Research Paper Publication","Research Project Management","Research Supervision","Scholarly Communication","Scholarly Writing","Special Education Awareness","Student Assessment Techniques","Student Behavior Management","Student Engagement Strategies","Student Progress Tracking","Subject Matter Expertise (School Level)","Survey Design","Teaching Methodology","Thesis Supervision","Time Management (Academic Context)","University-Level Assessment Design"],
+  "Law & Governance": ["Administrative Procedures","Appeal Review Analysis","Arbitration & Mediation","Bureaucratic Structure Management","Case Adjudication","Case Law Analysis","Civil Law","Citizen Grievance Handling","Compliance Management","Constitutional Law","Contract Law","Corporate Governance","Court Administration","Court Procedure Knowledge","Courtroom Management","Criminal Law","Crisis Management (Public Sector)","Dispute Resolution","Evidence Analysis","Government Budgeting","Government Documentation","Governance Framework","Infrastructure Planning","Institutional Coordination","Interdepartmental Coordination","Judgment Writing","Judicial Decision Making","Judicial Ethics","Judicial Precedent Application","Legal Advisory","Legal Argument Development","Legal Case Preparation","Legal Compliance","Legal Compliance Oversight","Legal Documentation","Legal Drafting","Legal Ethics","Legal Evidence Evaluation","Legal Filing Procedures","Legal Policy Evaluation","Legal Precedent Analysis","Legal Reasoning Frameworks","Legal Research","Legal Review & Opinion Writing","Legal Risk Assessment","Legal Writing","Legislative Process Understanding","Litigation Strategy","Policy Drafting","Policy Implementation","Procedural Law","Procedural Oversight","Public Accountability Mechanisms","Public Administration Law","Public Financial Management","Public Health Awareness","Public Policy Analysis","Public Program Evaluation","Public Resource Allocation","Public Sector Management","Public Service Ethics","Regulatory Administration","Regulatory Reporting","Sentencing Guidelines Knowledge","Statutory Audit","Statutory Interpretation","Trial Supervision"],
+  "Media, Marketing & Communication": ["Audience Engagement Strategy","Blog Writing","Brand Management","Brand Strategy","Brand Style Guide Creation","Brand Voice Development","Campaign Planning","Communication Strategy","Content Calendar Management","Content Optimization","Content Planning","Content Strategy","Content Writing","Conversion Tracking","Corporate Storytelling","Crisis Communication","Digital Strategy","Event Marketing","Fundraising Strategy","Hashtag Strategy","Influencer Campaign Management","Influencer Strategy","Media Pitching","Marketing Communication","Marketing CRM Tools","Marketing Dashboard Creation","Marketing Funnel Optimization","Marketing Metrics Analysis","Marketing Reporting","MVPDevelopment Strategy","Online Reputation Monitoring","Partnership Development","PPC Campaign Management","Performance Metrics Analysis","Press Release Writing","Public Relations Strategy","SEO","SEO Fundamentals","SEM","Script Writing","Social Media Advertising","Social Media Content Creation","Social Media Visual Design","Stakeholder Communication","Target Audience Segmentation","Video Script Development"],
+  "Aviation & Transport": ["Air Navigation","Air Traffic Communication","Aircraft Handling","Aircraft Systems Knowledge","Airspace Regulations","Aviation Regulations","Aviation Risk Assessment","Aviation Safety Procedures","Aviation Weather Interpretation","Cockpit Resource Management","Cost Optimization (Logistics)","Demand Forecasting","Distribution Planning","Emergency Flight Procedures","Emergency Response Assistance","Flight Briefing Procedures","Flight Operations","Flight Planning","Global Trade Regulations","Import & Export Procedures","In-Flight Decision Making","Instrument Flying","Inventory Management","Landing & Takeoff Procedures","Lean Logistics","Logistics Planning","Meteorology (Aviation Context)","Navigation Systems Operation","Operations Coordination","Order Fulfillment Management","Pre-Flight Inspection","Supply Chain Automation","Supply Chain Management","Supply Chain Risk Management","Supply Network Design","Transportation Management","Warehouse Management"],
+  "Psychology & Social Work": ["Addiction Counseling","Anger Management Therapy","Behavioral Analysis","Child & Adolescent Therapy","Child Development Understanding","Cognitive Behavioral Therapy (CBT)","Couples Therapy","Crisis Intervention","Crisis Management","Family Therapy","Grief Counseling","Group Therapy Facilitation","Motivational Interviewing","Psychoeducation","Psychological Assessment","Psychotherapy Techniques","Risk-Based Auditing","Trauma-Informed Care"],
+  "Performing Arts": ["Auditioning Techniques","Characterization","Costume Design","Dialects & Accents","Directing Basics","Emotional Memory Techniques","Improvisation","Makeup & Costume Basics","Method Acting","Monologue Delivery","Movement & Physical Theatre","On-Camera Acting","Playwriting/Screenwriting","Script Analysis","Set Design Basics","Singing/Vocal Performance","Sound Design Basics","Stage Combat","Voice Acting & Modulation"],
+  "Operations & Management": ["Budget Management","Business Strategy","Capacity Planning","Change Management","Compliance Management","Customer Analytics","Decision Analysis","Documentation Management","ERP Systems (Finance Context)","ERP Systems (Supply Chain Context)","Engineering Project Management","Innovation Management","Interdisciplinary Coordination","KPI Development","Lean Manufacturing","Lean Operations","Lean Startup Methodology","Operations Management","Operations Planning","Operational Decision Making","Organizational Structure Design","Performance Tracking","Process Improvement","Process Mapping","Process Optimization","Procurement Management","Project Estimation","Project Management","Quality Assurance Management","Quality Control","Resource Allocation","Risk Management (Healthcare)","Service Operations","Six Sigma (Business Application)","Stakeholder Management","Strategic Planning","Vendor Management","Workflow Optimization","Workforce Planning"]
+};
+
+const SOFT_SKILLS = {
+  "Thinking & Problem Solving": ["Analytical Thinking","Argumentation Skills","Critical Thinking","Decision Making","Logical Reasoning","Problem Solving","Process-Oriented Thinking","Strategic Thinking","Systems Thinking","Technical Problem Solving","Visionary Thinking"],
+  "Communication & Interpersonal": ["Active Listening","Business Acumen","Communication Skills","Coordination Skills","Documentation Skills","Negotiation","Negotiation Skills","Persuasion Skills","Pitching/Presentation","Presentation Skills","Public Speaking","Stakeholder Communication","Technical Communication"],
+  "Creativity & Innovation": ["Aesthetic Awareness","Artistic Sensibility","Brand Sensitivity","Content Creativity","Creative Problem Solving","Creative Thinking","Creativity","Innovation Mindset","Storytelling Ability","Trend Awareness","Visual Imagination"],
+  "Leadership & Teamwork": ["Campaign Leadership","Collaboration","Collaborative Spirit","Leadership","Leadership Strategy","Mentorship Ability","Project Management","Project Management Skills","Team Collaboration","Team Management","Teamwork"],
+  "Professional & Ethical": ["Accountability","Accuracy Focus","Authority Handling","Civic Responsibility","Compliance Awareness","Confidentiality Management","Ethical Judgment","Financial Integrity","Impartiality","Professional Discipline","Professional Integrity","Professional Skepticism","Professionalism","Responsibility","Safety Awareness"],
+  "Emotional & Personal": ["Adaptability","Attention to Detail","Compassion","Conflict Resolution","Customer Empathy","Emotional Stability","Empathy","Focus & Concentration","Learning Agility","Motivation Skills","Openness to Feedback","Organizational Skills","Patience","Patience and Perseverance","Precision Focus","Resilience","Salesmanship","Situational Awareness","Spatial Awareness","Stress Management","Time Management"],
+  "Domain-Specific": ["Clinical Reasoning","Customer Analytics","Client Handling","Client Relationship Management","Classroom Presence","Crisis Handling","Observational Skills","Risk Evaluation","Troubleshooting Skills"]
+};
+
+const INTERESTS = {
+  "Technology & Science": ["Algorithm Design","Algorithmic Trading","Artificial Intelligence","Automation","Data & Analytics","Data Science","Data-Driven Decision Making","Emerging Technologies","Hardware Systems","Industrial Automation","Machine Learning","Mathematics","Open Source Contribution","Problem Solving Challenges","Programming","Robotics","Scientific Inquiry","Scientific Research","Smart Cities","Smart Technologies","Software Development","Technology","Web Applications"],
+  "Design & Arts": ["Animation","Architectural Design","Art History","Character Design","Costume Design","Creative Entrepreneurship","Creative Expression","Design Innovation","Design Systems","Digital Art","Filmmaking","Graphic Design","Illustration","Photography","Storytelling","Video Game Design","Visual Arts","Visual Storytelling"],
+  "Business & Finance": ["Accounting Systems","Algorithmic Trading","Brand Growth","Branding","Business Consulting","Business Finance","Business Promotion","Business Strategy","Business Valuation","Capital Markets","Competitive Analysis","Consumer Trends","Corporate Finance","Corporate Governance","Corporate Strategy","Cost Optimization","Customer Experience","Customer Journey","Digital Platforms","Digital Products","Economic Trends","Entrepreneurship","Financial Analysis","Financial Growth","Financial Markets","Industry Research","International Finance","International Trade","Investment Strategies","Market Analysis","Market Trends","Marketing Analytics","Organizational Growth","Performance Metrics","Retail Banking","Revenue Growth","Risk Management","Startups","Stock Market","Taxation","Technology in Business","Wealth Management"],
+  "Healthcare & Medicine": ["Chronic Disease Management","Community Health","Disease Prevention","Emergency Medicine","Geriatrics","Health Awareness","Healthcare Ethics","Holistic Healing","Hospital Management","Human Biology","Medical Innovation","Medical Research","Mental Health","Mental Health Advocacy","Neurology","Neuroscience","Patient Advocacy","Patient Care","Pediatrics","Pharmacology","Physical Fitness","Preventive Medicine","Public Health","Rehabilitation","Sports Medicine","Wellness Coaching"],
+  "Education & Research": ["Academic Leadership","Academic Research","Academic Writing","Critical Inquiry","Curriculum Innovation","Educational Technology","Higher Education","Intellectual Discussion","Knowledge Sharing","Lifelong Learning","Research","Research Publication","Scholarly Advancement","Student Development","Student Success","Subject Expertise","Teaching"],
+  "Law, Policy & Governance": ["Civil Rights","Civic Administration","Community Development","Compliance & Regulation","Constitutional Governance","Dispute Resolution","Ethical Governance","Government Administration","Human Rights","Judicial Processes","Justice System","Law Enforcement","Legal Advocacy","Legal Reform","Legal Research","Public Accountability","Public Policy","Public Service","Regulatory Frameworks","Social Impact","Social Justice","Social Welfare Policies"],
+  "Engineering & Infrastructure": ["Applied Physics","Architectural Design","Aviation","Aviation Safety","Building Innovation","Construction Projects","Electrical Systems","Energy Systems","Engineering Design","Engineering Simulation","Environmental Sustainability","Global Logistics","Global Supply Chains","Industrial Innovation","Industrial Operations","Industrial Safety","Infrastructure Development","Irrigation Engineering","Large Scale Projects","Machinery","Manufacturing Processes","Manufacturing Systems","Mechanical Systems","Power Systems","Renewable Energy","Robotics","Smart Technologies","Structural Design","Structural Systems","Sustainable Buildings","Sustainable Engineering","Transportation Systems","Urban Development","Urban Planning","Vehicle Dynamics"],
+  "Media, Marketing & Social": ["Audience Psychology","Brand Growth","Branding","Content Creation","Digital Campaigns","Influencer Culture","Online Communities","Photography","Social Media","Viral Marketing"],
+  "Aviation & Transport": ["Air Travel","Aircraft Operations","Aviation","Aviation Safety","Global Logistics","Global Supply Chains","Transportation Systems"],
+  "Personal & Lifestyle": ["Art History","Automotive Technology","Behavioral Science","Human Behavior","Human-Computer Interaction","Lifelong Learning","Physical Fitness","Psychology","Social Sciences","User Behavior Psychology","User Experience","User Experience (UX)"]
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────
+const state = {
+  hardSkills: new Set(),
+  softSkills: new Set(),
+  interests: new Set()
+};
+
+// ── PAGE NAVIGATION ───────────────────────────────────────────────────
+const pages = ['page-home','page-step1','page-step2','page-step3','page-step4','page-results'];
+
+function goToStep(n) {
+  pages.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.toggle('active', i === n);
+  });
+  window.scrollTo(0, 0);
+}
+
+function resetAndGoHome() {
+  state.hardSkills.clear();
+  state.softSkills.clear();
+  state.interests.clear();
+
+  document.getElementById('education-level').value = '';
+  document.getElementById('degree-field').value = '';
+  document.getElementById('profile-type').value = '';
+  document.getElementById('experience-level').value = '';
+
+  document.getElementById('hard-count').textContent = '0';
+  document.getElementById('soft-count').textContent = '0';
+  document.getElementById('interest-count').textContent = '0';
+  document.getElementById('btn-hard-next').disabled = true;
+  document.getElementById('btn-soft-next').disabled = true;
+  document.getElementById('btn-interest-next').disabled = true;
+
+  renderChips('hard-skills-container', HARD_SKILLS, state.hardSkills, 'hard-count', 'btn-hard-next');
+  renderChips('soft-skills-container', SOFT_SKILLS, state.softSkills, 'soft-count', 'btn-soft-next');
+  renderChips('interests-container', INTERESTS, state.interests, 'interest-count', 'btn-interest-next');
+
+  goToStep(0);
+}
+
+// ── RENDER CHIPS ──────────────────────────────────────────────────────
+function renderChips(containerId, data, stateSet, countId, nextBtnId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+
+  Object.entries(data).forEach(([category, items]) => {
+    const section = document.createElement('div');
+    section.className = 'category-section';
+
+    const label = document.createElement('div');
+    label.className = 'category-label';
+    label.textContent = category;
+    section.appendChild(label);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'chips-wrap';
+
+    items.forEach(item => {
+      const chip = document.createElement('div');
+      chip.className = 'chip' + (stateSet.has(item) ? ' selected' : '');
+      chip.textContent = item;
+      chip.onclick = () => {
+        if (stateSet.has(item)) {
+          stateSet.delete(item);
+          chip.classList.remove('selected');
+        } else {
+          stateSet.add(item);
+          chip.classList.add('selected');
+        }
+        document.getElementById(countId).textContent = stateSet.size;
+        document.getElementById(nextBtnId).disabled = stateSet.size === 0;
+      };
+      wrap.appendChild(chip);
+    });
+
+    section.appendChild(wrap);
+    container.appendChild(section);
+  });
+}
+
+// ── SUBMIT ─────────────────────────────────────────────────────────────
+async function submitForm() {
+  const edu = document.getElementById('education-level').value;
+  const deg = document.getElementById('degree-field').value;
+  const pro = document.getElementById('profile-type').value;
+  const exp = document.getElementById('experience-level').value;
+
+  if (!edu || !deg || !pro || exp === '') {
+    showError('Please fill in all fields before continuing.');
+    return;
+  }
+
+  const payload = {
+    hard_skills: Array.from(state.hardSkills),
+    soft_skills: Array.from(state.softSkills),
+    interests:   Array.from(state.interests),
+    education_level: edu,
+    degree_field: deg,
+    profile_type: pro,
+    experience_level: parseInt(exp)
+  };
+
+  document.getElementById('loading-overlay').classList.add('show');
+
+  try {
+    const res = await fetch('http://127.0.0.1:5000/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!data.success) throw new Error(data.error || 'Unknown error');
+
+    renderResults(data.recommendations);
+    goToStep(5);
+
+  } catch (err) {
+    showError('Could not connect to server. Make sure app.py is running.');
+    console.error(err);
+  } finally {
+    document.getElementById('loading-overlay').classList.remove('show');
+  }
+}
+
+// ── RENDER RESULTS ────────────────────────────────────────────────────
+function renderResults(recommendations) {
+  const grid = document.getElementById('results-grid');
+  grid.innerHTML = '';
+
+  recommendations.forEach((rec, i) => {
+    const card = document.createElement('div');
+    card.className = 'result-card rank-' + (i + 1);
+
+    const rankLabels = ['1st Choice', '2nd Choice', '3rd Choice'];
+
+    card.innerHTML = `
+      <div class="result-rank">${rankLabels[i]}</div>
+      <div class="result-career">${rec.career}</div>
+      <div class="confidence-label">Model Confidence</div>
+      <div class="confidence-bar-bg">
+        <div class="confidence-bar-fill" style="width: 0%" data-width="${rec.confidence}%"></div>
+      </div>
+      <div class="confidence-pct">${rec.confidence}%</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Animate bars after render
+  setTimeout(() => {
+    document.querySelectorAll('.confidence-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.width;
+    });
+  }, 100);
+}
+
+// ── ERROR TOAST ───────────────────────────────────────────────────────
+function showError(msg) {
+  const toast = document.getElementById('error-toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+renderChips('hard-skills-container', HARD_SKILLS, state.hardSkills, 'hard-count', 'btn-hard-next');
+renderChips('soft-skills-container', SOFT_SKILLS, state.softSkills, 'soft-count', 'btn-soft-next');
+renderChips('interests-container', INTERESTS, state.interests, 'interest-count', 'btn-interest-next');
+</script>
+</body>
+</html>
